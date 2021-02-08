@@ -1,4 +1,6 @@
 import pygame
+from Runner import Runner
+from Platformer import Platformer
 successes, failures = pygame.init()
 print("{0} successes and {1} failures".format(successes, failures))
 
@@ -7,23 +9,17 @@ screen = pygame.display.set_mode((1024, 768))
 clock = pygame.time.Clock()
 FPS = 30
 
-from Runner import Runner
-run = Runner
-
-from Platformer import Platformer
-plat = Platformer
+run = Runner(screen)
+plat = Platformer(screen)
 
 phase = "main_menu"
 
 
-def update(x, y):
-    print("x = {0}  and y = {1} ".format(x, y))
+def update(ux, uy):
     if phase == "platform":
-        print("platformer")
-        plat.update(x, y)
+        plat.update(ux, uy)
     elif phase == "runner":
-        print("runner")
-        run.update(x, y)
+        run.update(ux, uy)
 
 
 running = True
@@ -58,4 +54,4 @@ while running:
                 print("lr")
                 x = 0
     update(x, y)
-    pygame.display.update()  # Or pygame.display.flip()
+    pygame.display.update()

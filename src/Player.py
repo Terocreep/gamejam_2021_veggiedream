@@ -1,6 +1,7 @@
 import pygame
 
-class Player():
+
+class Player:
     def __init__(self, image):
         print("init")
         self.image = pygame.Surface((32, 32))
