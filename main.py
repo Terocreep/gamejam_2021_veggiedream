@@ -37,22 +37,17 @@ while running:
                 print("up")
                 y = -1
             elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                print("right")
                 y = 1
             elif event.key == pygame.K_q or event.key == pygame.K_LEFT:
-                print("left")
                 x = -1
             elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                print("down")
                 x = 1
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_z or event.key == pygame.K_UP \
                     or event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                print("ud")
                 y = 0
             elif event.key == pygame.K_q or event.key == pygame.K_LEFT \
                     or event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                print("lr")
                 x = 0
     update(x, y)
     pygame.display.update()
