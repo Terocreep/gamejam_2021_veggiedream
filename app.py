@@ -5,14 +5,14 @@ print("{0} successes and {1} failures".format(successes, failures))
 
 screen = pygame.display.set_mode((720, 480))
 clock = pygame.time.Clock()
-FPS = 60  
+FPS = 60
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
 rect = pygame.Rect((0, 0), (32, 32))
 image = pygame.Surface((32, 32))
-image .fill(WHITE)  
+image .fill(WHITE)
 
 while True:
     clock.tick(FPS)
