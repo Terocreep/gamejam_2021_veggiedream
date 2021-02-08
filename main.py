@@ -9,24 +9,25 @@ screen = pygame.display.set_mode((1024, 768))
 clock = pygame.time.Clock()
 FPS = 30
 
-run = Runner(screen)
-plat = Platformer(screen)
+run = Runner("")
+plat = Platformer("")
 
-phase = "main_menu"
+x = 0
+y = 0
+
+phase = "platform"
 
 
 def update(ux, uy):
     if phase == "platform":
-        plat.update(ux, uy)
+        plat.update(ux, uy, screen)
     elif phase == "runner":
-        run.update(ux, uy)
+        run.update(ux, uy, screen)
 
 
 running = True
 while running:
     time = clock.tick(FPS) / 1000
-    x = 0
-    y = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -34,13 +35,13 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_z or event.key == pygame.K_UP:
                 print("up")
-                y = 1
+                y = -1
             elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 print("right")
                 y = 1
             elif event.key == pygame.K_q or event.key == pygame.K_LEFT:
                 print("left")
-                x = 1
+                x = -1
             elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                 print("down")
                 x = 1
