@@ -2,7 +2,7 @@ import pygame
 
 pygame.init()
 
-from gamejam-2021.vue import Vue
+from gamejam_2021.vue import Vue
 
 
 def main():
