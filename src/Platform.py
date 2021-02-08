@@ -2,11 +2,12 @@ import pygame
 
 
 class Platform:
-    def __init__(self, x, y, width, height):
-        print("init")
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.image = pygame.Surface((width, height))
+        self.sprite = pygame.image.load('images/sol_jour.png')
+        self.sprite = pygame.transform.scale(self.sprite, (68, 64))
+        self.image = pygame.Surface((64, 64))
         self.image.fill((0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.move_ip(x, y)
