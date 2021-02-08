@@ -28,7 +28,7 @@ def update(ux, uy):
 running = True
 while running:
     time = clock.tick(FPS) / 1000
-
+    screen.fill((0, 0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
