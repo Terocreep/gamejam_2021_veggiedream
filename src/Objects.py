@@ -11,7 +11,7 @@ class Saw(object):
         self.y = y
         self.width = width
         self.height = height
-        self.rect = (x, y, width, height)
+        self.rect = pygame.rect.Rect(x, y, width, height)
         self.frame_count = 0
 
     def draw(self, screen):
@@ -20,8 +20,6 @@ class Saw(object):
             self.frame_count = 0
         screen.blit(pygame.transform.scale(self.img[self.frame_count // 2], (64, 64)), (self.x, self.y))
         self.frame_count += 1
-        #pygame.draw.rect(screen, (255,0,0), self.rect, 2)
-
 
 class Bird(Saw):
     img = pygame.image.load(os.path.join('images', 'bird.png'))
@@ -29,8 +27,6 @@ class Bird(Saw):
     def draw(self, screen):
         self.rect = (self.x, self.y, self.width, self.height)
         screen.blit(pygame.transform.scale(self.img, (64, 32)), (self.x, self.y))
-        #pygame.draw.rect(screen, (255,0,0), self.rect, 2)
-
 
 class Carrot(Saw):
     img = pygame.image.load(os.path.join('images', 'carrot.png'))
@@ -38,4 +34,22 @@ class Carrot(Saw):
     def draw(self, screen):
         self.rect = (self.x, self.y, self.width, self.height)
         screen.blit(pygame.transform.scale(self.img, (32, 32)), (self.x, self.y))
-        #pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+
+class GiantCarrot(Saw):
+    img = [pygame.image.load(os.path.join('images', 'carotte_course_1.png')), pygame.image.load(os.path.join('images', 'carotte_course_2.png'))]
+
+    def draw(self, screen):
+        self.rect = (self.x + 15, self.y, self.width - 47, self.height)
+        if self.frame_count >= 4:
+            self.frame_count = 0
+        screen.blit(pygame.transform.scale(self.img[self.frame_count // 2], (128, 128)), (self.x, self.y))
+        self.frame_count += 1
+        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+
+    def destroyObstacle(self, obstacles):
+        mort = False
+        #for o in obstacles:
+            #if self.rect.x - 10 < o.rect.x < self.rect.x + 50:
+                #if self.rect.colliderect(o.rect):
+                    #mort = True
+        return mort
