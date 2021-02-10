@@ -18,7 +18,7 @@ plat = Platformer("1")
 x = 0
 y = 0
 
-phase = "runner"
+phase = "platform"
 
 
 def update(ux, uy):

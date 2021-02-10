@@ -15,7 +15,7 @@ class Player:
                      pygame.transform.scale(pygame.image.load("images/lapin_course_2.png"), (66, 64)),
                      pygame.transform.scale(pygame.image.load("images/lapin_course_3.png"), (66, 64)),
                      pygame.transform.scale(pygame.image.load("images/lapin_course_4.png"), (66, 64)),
-                     pygame.transform.scale(pygame.image.load("images/lapin_stand.png"), (66,64))]
+                     pygame.transform.scale(pygame.image.load("images/lapin_stand.png"), (66, 64))]
         self.img = self.imgs[math.trunc(self.walkcount/5)]
         self.sprite = pygame.transform.flip(self.img, False, False)
         self.rect = self.sprite.get_rect()
@@ -124,15 +124,18 @@ class Player:
     def die(self, platforms, enemys, obstacles):
         mort = False
         for p in platforms:
-            # si colision avec une platforme mortel
-            if self.rect.colliderect(p.rect) and p.mortel:
-                mort = True
+            if self.rect.x - 100 < p.x < self.rect.x + 100:
+                # si colision avec une platforme mortel
+                if self.rect.colliderect(p.rect) and p.mortel:
+                    mort = True
         for e in enemys:
-            if self.rect.colliderect(e.rect):
-                mort = True
+            if self.rect.x - 100 < e.x < self.rect.x + 100:
+                if self.rect.colliderect(e.rect):
+                    mort = True
         for o in obstacles:
-            if self.rect.colliderect(o.rect):
-                mort = True
+            if self.rect.x - 100 < o.x < self.rect.x + 100:
+                if self.rect.colliderect(o.rect):
+                    mort = True
         if mort:
             # réspawn aux coordonée
             self.rect.x = self.x

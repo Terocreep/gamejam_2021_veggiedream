@@ -28,8 +28,6 @@ class Platformer:
             self.platforms.append(Platform(x, y, map_data['block_sprite']["{}".format(item[3])].format("sol"), trav, mort))
 
     def update(self, x, y, screen):
-        # screen.blit(self.background, pygame.Surface((1024,768)).get_rect())  "user/{}.txt".format(a)
-
         player.velocity[0] = 6 * x
 
         police = pygame.font.Font(None, 20)
