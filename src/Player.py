@@ -124,16 +124,16 @@ class Player:
     def die(self, platforms, enemys, obstacles):
         mort = False
         for p in platforms:
-            if self.rect.x - 100 < p.x < self.rect.x + 100:
+            if self.rect.x - 100 < p.rect.x < self.rect.x + 100:
                 # si colision avec une platforme mortel
                 if self.rect.colliderect(p.rect) and p.mortel:
                     mort = True
         for e in enemys:
-            if self.rect.x - 100 < e.x < self.rect.x + 100:
+            if self.rect.x - 100 < e.rect.x < self.rect.x + 100:
                 if self.rect.colliderect(e.rect):
                     mort = True
         for o in obstacles:
-            if self.rect.x - 100 < o.x < self.rect.x + 100:
+            if self.rect.x - 100 < o.rect.x < self.rect.x + 100:
                 if self.rect.colliderect(o.rect):
                     mort = True
         if mort:

@@ -1,12 +1,12 @@
 from src.Player import Player
 from src.Platform import Platform
-from src.Objects import Saw, Bird, Carrot
+from src.Objects import Saw, Bird, Carrot, GiantCarrot
 import math
 import pygame
 import random
 
 player = Player("", 400, 200)
-
+gCarrot = GiantCarrot(2, 581, 128, 128)
 
 class Runner:
 
@@ -77,6 +77,9 @@ class Runner:
         self.x1 -= self.speed/2
         self.x2 -= self.speed/3
 
+        #Ajout de la Carrote Géante
+        gCarrot.draw(screen)
+
         #Verfication de la collision
         player.die([], self.enemy, self.obstacles)
 
@@ -91,8 +94,9 @@ class Runner:
             player.update(self.platforms_sol)
         screen.blit(player.sprite, player.rect)
 
+        #Ajout de carotte
         if self.nb_frame == self.random_carrot_spawn:
-            h = random.randint(400, 560)
+            h = random.randint(450, 677)
             self.carrots.append(Carrot(1030, h, 32, 32))
             self.random_carrot_spawn = random.randint(45, 70)
 
@@ -110,9 +114,9 @@ class Runner:
         if self.nb_frame == self.random_frame:
             r = random.randint(0, 2)
             if r == 0:
-                self.obstacles.append(Saw(1030, 560, 64, 64))
+                self.obstacles.append(Saw(1030, 645, 64, 64))
             elif r == 1:
-                self.obstacles.append(Bird(1030, 400, 64, 32))
+                self.obstacles.append(Bird(1030, 450, 64, 32))
 
             self.nb_frame = 0
             self.random_frame = random.randint(60,80)
@@ -121,6 +125,10 @@ class Runner:
 
             obstacle.x -= self.speed
             obstacle.draw(screen)
+
+            if gCarrot.destroyObstacle(self.obstacles):
+                print("destruct")
+
             if obstacle.x < obstacle.width * -1:
                 self.obstacles.pop(self.obstacles.index(obstacle))
 

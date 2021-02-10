@@ -1,14 +1,30 @@
+from src.Score import Score
+from src.Player import Player
+from src.Platform import Platform
+from src.Enemy import Enemy
+from src.Enemy import Lanceur
+from src.Deplacement import Deplacement
+from src.Covec import CoVec
+
 from src.Player import Player
 from src.Platform import Platform
 import pygame
 import json
 
-player = Player("", 0, 500)
-
 
 class Platformer:
     def __init__(self, level):
-        # self.background = pygame.image.load('images/background.png')
+        self.player = Player("", 0, 500)
+        self.player.rect.x = 0
+        self.player.rect.y = 500
+        self.score = Score("michel")
+        self.score.newVar("meurt", -10)
+
+        self.enemys = []
+        self.enemys.append(
+            Lanceur(Deplacement(CoVec(200, 23*64-32), CoVec(500, 23*64-32), CoVec(2, 0)), "tomate_ennemy.png", 32, 32,
+                    "tomate_ennemy.png", 32, 32, 200, 40))
+
         self.platforms = []
 
         with open("levels/lvl{}.json".format(level), 'r') as f:
@@ -28,36 +44,47 @@ class Platformer:
             self.platforms.append(Platform(x, y, map_data['block_sprite']["{}".format(item[3])].format("sol"), trav, mort))
 
     def update(self, x, y, screen):
-        player.velocity[0] = 6 * x
+        self.player.velocity[0] = 6 * x
 
-        police = pygame.font.Font(None, 20)
+        if not self.player.die(self.platforms, self.enemys, self.enemys):
+            off_x = (self.player.rect.centerx - 1024 / 2)
+            if self.player.rect.centerx < 1024 / 2:
+                off_x = 0
+            elif self.player.rect.centerx > self.width - 1024 / 2:
+                off_x = self.width - 1024
 
-        off_x = (player.rect.centerx - 1024 / 2)
-        if player.rect.centerx < 1024 / 2:
-            off_x = 0
-        elif player.rect.centerx > self.width - 1024 / 2:
-            off_x = self.width - 1024
+            off_y = (self.player.rect.centery - 786 / 2)
+            if self.height - self.player.rect.centery < 768 / 2:
+                off_y = self.height - 768
+            elif self.height - self.player.rect.centery > self.height - 768 / 2:
+                off_y = 0
 
-        off_y = (player.rect.centery - 786 / 2)
-        if self.height - player.rect.centery < 768 / 2:
-            off_y = self.height - 768
-        elif self.height - player.rect.centery > self.height - 768 / 2:
-            off_y = 0
+            if y == -1:
+                self.player.jump(self.platforms)
+                self.player.update(self.platforms)
+            elif y == 1:
+                self.player.sneak(self.platforms)
+            else:
+                self.player.update(self.platforms)
+            for p in self.platforms:
+                r = pygame.rect.Rect(0, 0, p.rect.w, p.rect.h)
+                r.centerx = p.rect.centerx - off_x
+                r.centery = p.rect.centery - off_y
+                screen.blit(p.sprite, r)
 
-        if y == -1:
-            player.jump(self.platforms)
-            player.update(self.platforms)
-        elif y == 1:
-            player.sneak(self.platforms)
+            for e in self.enemys:
+                e.deplacementNormale(self.enemys)
+                er = pygame.rect.Rect(0, 0, e.rect.w, e.rect.h)
+                er.centerx = e.rect.centerx - off_x
+                er.centery = e.rect.centery - off_y
+                screen.blit(e.sprite, er)
+
+            pr = pygame.rect.Rect(0, 0, self.player.rect.w, self.player.rect.h)
+            pr.centerx = self.player.rect.centerx - off_x
+            pr.centery = self.player.rect.centery - off_y
+            screen.blit(self.player.sprite, pr)
+
         else:
-            player.update(self.platforms)
-        for p in self.platforms:
-            r = pygame.rect.Rect(0, 0, p.rect.w, p.rect.h)
-            r.centerx = p.rect.centerx - off_x
-            r.centery = p.rect.centery - off_y
-            screen.blit(p.sprite, r)
+            self.score.execVar("meurt")
 
-        pr = pygame.rect.Rect(0, 0, player.rect.w, player.rect.h)
-        pr.centerx = player.rect.centerx - off_x
-        pr.centery = player.rect.centery - off_y
-        screen.blit(player.sprite, pr)
+

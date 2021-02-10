@@ -26,7 +26,6 @@ def update(ux, uy):
         run.update(ux, uy, screen)
 
 
-
 running = True
 while running:
     time = clock.tick(FPS) / 1000
