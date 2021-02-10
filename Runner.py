@@ -19,4 +19,4 @@ class Runner:
         player.update(self.platforms)
         for p in self.platforms:
             screen.blit(p.image, (p.x, p.y))
-        screen.blit(player.sprite, player.rect)
+        screen.blit(player.image, player.rect)

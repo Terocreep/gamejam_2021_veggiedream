@@ -1,4 +1,5 @@
 import pygame
+import random
 from Runner import Runner
 from Platformer import Platformer
 successes, failures = pygame.init()
@@ -9,8 +10,8 @@ screen = pygame.display.set_mode((1024, 768))
 clock = pygame.time.Clock()
 FPS = 30
 
-run = Runner("")
-plat = Platformer("")
+# run = Runner("")
+plat = Platformer("1")
 
 x = 0
 y = 0
@@ -25,6 +26,7 @@ def update(ux, uy):
         run.update(ux, uy, screen)
 
 
+
 running = True
 while running:
     time = clock.tick(FPS) / 1000
@@ -34,7 +36,6 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_z or event.key == pygame.K_UP:
-                print("up")
                 y = -1
             elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 y = 1
@@ -50,4 +51,5 @@ while running:
                     or event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                 x = 0
     update(x, y)
+
     pygame.display.update()
