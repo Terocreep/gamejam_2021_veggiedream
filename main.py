@@ -10,6 +10,8 @@ screen = pygame.display.set_mode((1024, 768))
 clock = pygame.time.Clock()
 FPS = 30
 
+#Menu
+
 run = Runner("")
 plat = Platformer("1")
 
