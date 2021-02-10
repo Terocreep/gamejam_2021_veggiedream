@@ -10,13 +10,13 @@ screen = pygame.display.set_mode((1024, 768))
 clock = pygame.time.Clock()
 FPS = 30
 
-# run = Runner("")
+run = Runner("")
 plat = Platformer("1")
 
 x = 0
 y = 0
 
-phase = "platform"
+phase = "runner"
 
 
 def update(ux, uy):

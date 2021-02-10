@@ -3,15 +3,12 @@ from src.Platform import Platform
 import pygame
 import json
 
-player = Player("")
+player = Player("", 0, 500)
 
 
 class Platformer:
     def __init__(self, level):
         # self.background = pygame.image.load('images/background.png')
-        player.velocity[1] = 500
-        player.update([])
-        player.velocity[1] = 0
         self.platforms = []
 
         with open("levels/lvl{}.json".format(level), 'r') as f:
