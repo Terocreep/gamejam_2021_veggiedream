@@ -126,7 +126,8 @@ class Player:
         for p in platforms:
             if self.rect.x - 100 < p.rect.x < self.rect.x + 100:
                 # si colision avec une platforme mortel
-                if self.rect.colliderect(p.rect) and p.mortel:
+                if p.mortel and (self.is_on(p) or self.colliding_w_wall_left(p) or
+                                 self.colliding_w_wall_right(p) or self.is_under(p)):
                     mort = True
         for e in enemys:
             if self.rect.x - 100 < e.rect.x < self.rect.x + 100:
