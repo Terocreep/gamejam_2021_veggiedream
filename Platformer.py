@@ -19,13 +19,28 @@ class Platformer:
         self.height = 0
         self.width = 0
 
+        self.cadre = pygame.transform.scale(pygame.image.load("images/health_bar.png"), (402, 66))
+
         self.score = Score("michel")
         self.score.newVar("meurt", -10)
 
         self.enemys = []
+
+        # enemy template
+
+       # self.enemys.append(Enemy(Deplacement(CoVec(44 * 64, 133 * 64 - 32), CoVec(47 * 64, 133 * 64 - 32), CoVec(2, 0)),
+       #                          "tomate_ennemy.png", 32, 32))
+       # self.enemys.append(Enemy(Deplacement(CoVec(64 * 64, 130 * 64 - 32), CoVec(67 * 64, 130 * 64 - 32), CoVec(2, 0)),
+       #                          "tomate_ennemy.png", 32, 32))
+       # self.enemys.append(
+       #     Lanceur(Deplacement(CoVec(56 * 64, 120 * 64 - 32), CoVec(58 * 64, 120 * 64 - 32), CoVec(1, 0)),
+       #             "tomate_ennemy.png", 32, 32,
+       #             "tomate/tomate_project_2.png", 16, 16, 2 * 64, 50))
+
         self.enemys.append(
-            Lanceur(Deplacement(CoVec(200, 23*64-32), CoVec(500, 23*64-32), CoVec(2, 0)), "tomate_ennemy.png", 32, 32,
-                    "tomate_ennemy.png", 32, 32, 200, 40))
+            Lanceur(Deplacement(CoVec(86 * 64, 115 * 64 - 32), CoVec(86 * 64, 115 * 64 - 32), CoVec(0, 0)),
+                    "tomate_ennemy.png", 32, 32,
+                    "tomate/tomate_project_2.png", 16, 16, 5 * 64, 70))
 
         self.platforms = []
 
@@ -86,6 +101,10 @@ class Platformer:
             pr.centerx = self.player.rect.centerx - off_x
             pr.centery = self.player.rect.centery - off_y
             screen.blit(self.player.sprite, pr)
+
+            screen.blit(self.cadre, (0, 0))
+            self.player.update_health_bar(screen)
+
 
         else:
             self.score.execVar("meurt")

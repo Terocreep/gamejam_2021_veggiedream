@@ -1,5 +1,6 @@
 import pygame
 import math
+from pygame import mixer
 
 
 pygame.display.set_mode((1024, 768))
@@ -10,7 +11,8 @@ class Player:
         self.image = pygame.Surface((66, 64))
         self.image.fill((255, 255, 255))
         self.walkcount = 0
-        self.dust = []
+        self.health = 24
+        self.max_health = 100
         self.imgs_falling = [
             pygame.transform.scale(pygame.image.load("images/lapin_falling_1.png"), (66, 64)),
             pygame.transform.scale(pygame.image.load("images/lapin_falling_2.png"), (66, 64)),
@@ -31,6 +33,8 @@ class Player:
         self.y = y
         self.walking = False
         self.is_falling = True
+        pygame.mixer.init()
+        self.sound_jump = mixer.Sound('musics/jump_sound.ogg')
 
     def sneak(self, platforms):
         self.is_falling = True
@@ -118,9 +122,10 @@ class Player:
 
     def jump(self, velocity, platforms):
         for p in platforms:
-            if self.velocity[1] == 0 and not self.is_on(p):
+            if self.velocity[1] == 0 and not self.is_on(p) and not self.rect.colliderect(p.rect):
                 self.is_falling = True
                 self.velocity[1] = -velocity
+                self.sound_jump.play()
 
     def gravity(self):
         self.velocity[1] += 2
@@ -136,8 +141,10 @@ class Player:
                                  self.colliding_w_wall_right(p) or self.is_under(p)):
                     mort = True
         for e in enemys:
-            if self.rect.x - 100 < e.rect.x < self.rect.x + 100:
-
+            m1 = pygame.mask.from_surface(self.sprite)
+            m2 = pygame.mask.from_surface(e.sprite)
+            if m1.overlap(m2, (self.rect.centerx - e.rect.centerx,
+                               self.rect.centery - e.rect.centery)):
                 if self.rect.colliderect(e.rect):
                     mort = True
         for o in obstacles:
@@ -167,3 +174,33 @@ class Player:
     def setCoordonneeRespawn(self, x, y):
         self.x = x
         self.y = y
+
+    def addHealth(self, health):
+        if self.max_health > self.health + health:
+            self.health = self.health + health
+        else:
+            self.health = self.max_health
+
+    def removeHealth(self, health):
+        if self.health - health < 0:
+            self.health = 0
+        else:
+            self.health = self.health - health
+
+    def getHealth(self):
+        return self.health
+
+    def update_health_bar(self, screen):
+        if self.health < 25:
+            health_color = (200, 0, 0)
+        elif self.health < 50:
+            health_color = (213, 122, 0)
+        else:
+            health_color = (25, 137, 0)
+        back_health_color = (106, 106, 106)
+
+        position = [36, 36, self.health * 1.65 * 2, 22]
+        back_position = [36, 36, self.max_health * 1.65 * 2, 22]
+
+        pygame.draw.rect(screen, back_health_color, back_position)
+        pygame.draw.rect(screen, health_color, position)

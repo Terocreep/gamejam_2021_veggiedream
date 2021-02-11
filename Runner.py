@@ -4,6 +4,7 @@ from src.Objects import Saw, Bird, Carrot, GiantCarrot
 import math
 import pygame
 import random
+from pygame import mixer
 
 player = Player("", 400, 200)
 gCarrot = GiantCarrot(0, 581, 128, 128)
@@ -20,6 +21,11 @@ class Runner:
 
         self.x = 0
 
+        # Music
+        pygame.mixer.init()
+        mixer.music.load('musics/background_runner.ogg')
+        mixer.music.play(-1)
+
         #Genere un evenement aleatoire entre 2 et 3,5 secondes
         self.obstacles = []
         self.nb_frame = 0
@@ -35,11 +41,16 @@ class Runner:
         self.txtX = 950
         self.txtY = 10
 
+        self.cadre = pygame.transform.scale(pygame.image.load("images/health_bar.png"), (402, 66))
+
         # Game Over
         self.game_over = False
 
-        # Collision with enemy
-        self.enemy = [gCarrot]
+        # Collision and enemy
+        self.gx = 128
+        self.gy = 128
+        self.gCarrot = GiantCarrot(0, 709 - self.gy, self.gx, self.gy)
+        self.enemy = [self.gCarrot]
 
         # backGround for paralax
         self.background_images = []
@@ -59,6 +70,8 @@ class Runner:
         player.walking = True
 
     def update(self, x, y, screen):
+
+        self.enemy = [self.gCarrot]
 
         #Defilement du background
         back = self.background_images[0]
@@ -84,12 +97,19 @@ class Runner:
         self.x2 -= self.speed/3
 
         #Ajout de la Carrote Géante
-        gCarrot.draw(screen)
+        self.gCarrot.draw(screen)
 
         #Verfication de la collision
-        if player.die([], self.enemy, self.obstacles):
-            self.game_over = True
-            print("Game Over")
+        if player.die([], [], self.obstacles) or player.rect.x <= self.enemy[0].mx:
+            player.removeHealth(20)
+            print("Health : ", player.getHealth())
+            player.rect.x = player.x
+            player.rect.y = player.y
+            player.velocity[0] = 0
+            player.velocity[1] = 0
+            if player.health <= 0:
+                self.game_over = True
+                print("Game Over")
 
         #Deplacement du joueur
         if y == -1:
@@ -104,58 +124,83 @@ class Runner:
 
         #Ajout de carotte
         if self.nb_frame == self.random_carrot_spawn:
-            h = random.randint(450, 677)
+            h = random.randint(500, 675)
             self.carrots.append(Carrot(1030, h, 32, 32))
-            if self.score_value < 30:
-                self.random_carrot_spawn = random.randint(45, 70)
-            elif 30 <= self.score_value <= 60:
-                self.random_carrot_spawn = random.randint(30, 45)
+            if self.score_value < 5:
+                self.random_carrot_spawn = random.randint(40, 60)
+            elif 5 <= self.score_value <= 7:
+                self.random_carrot_spawn = random.randint(30, 40)
             else:
                 self.random_carrot_spawn = random.randint(15, 30)
 
         for carrot in self.carrots:
+            isCatched = False
+
             carrot.x -= self.speed
             if player.rect.x - 100 < carrot.x < player.rect.x + 100:
                 if player.catchCarrot(self.carrots):
-                    self.carrots.pop(self.carrots.index(carrot))
                     self.score_value += 1
+                    isCatched = True
+                    player.addHealth(3)
+            if carrot.x < self.gCarrot.rect.x + 100:
+                if self.gCarrot.rect.colliderect(carrot.rect):
+                    self.gCarrot.mx += 5
+                    self.gCarrot.my += 5
+                    self.gCarrot.rect.x += 5
+                    self.gCarrot.rect.y += 5
+                    self.enemy = [self.gCarrot]
+                    isCatched = True
+
             if carrot.x < carrot.width * -1:
+                self.carrots.pop(self.carrots.index(carrot))
+            if isCatched:
                 self.carrots.pop(self.carrots.index(carrot))
             carrot.draw(screen)
 
         #Ajout d'obstacles
         if self.nb_frame == self.random_frame:
             r = random.randint(0, 2)
+            r1 = random.randint(0, 2)
+            h = random.randint(450, 515)
+
             if r == 0:
-                self.obstacles.append(Saw(1030, 613, 96, 96))
+                self.obstacles.append(Saw(1030, 629, 80, 80))
             elif r == 1:
-                self.obstacles.append(Bird(1030, 450, 64, 32))
+                self.obstacles.append(Bird(1030, h, 64, 32))
+                if r1 == 0 and self.score_value > 20:
+                    self.obstacles.append(Saw(1110, 629, 80, 80))
+                elif r1 == 1 and self.score_value > 20:
+                    self.obstacles.append(Bird(1100, h, 64, 32))
 
             self.nb_frame = 0
-            if self.score_value < 30:
-                self.random_frame = random.randint(60, 80)
-            elif 30 <= self.score_value <= 60:
+            if self.score_value < 20:
                 self.random_frame = random.randint(40, 60)
+            elif 20 <= self.score_value <= 35:
+                self.random_frame = random.randint(30, 47)
             else:
-                self.random_frame = random.randint(20, 40)
+                self.random_frame = random.randint(20, 37)
 
         for obstacle in self.obstacles:
 
             obstacle.x -= self.speed
             obstacle.draw(screen)
 
-            if gCarrot.destroyObstacle(self.obstacles):
-                gCarrot.hit(screen)
+            if self.gCarrot.destroyObstacle(self.obstacles):
+                self.gCarrot.hit(screen)
                 self.obstacles.pop(self.obstacles.index(obstacle))
 
             # Ajout de la Carrote Géante
-            gCarrot.draw(screen)
+            self.gCarrot.draw(screen)
 
             if obstacle.x < obstacle.width * -1:
                 self.obstacles.pop(self.obstacles.index(obstacle))
 
-            score = self.font.render(str(self.score_value), True, (255, 255, 255))
-            screen.blit(score, (self.txtX, self.txtY))
+        score = self.font.render(str(self.score_value), True, (255, 255, 255))
+        screen.blit(score, (self.txtX, self.txtY))
 
         self.nb_frame += 1
-        self.speed = 6 + math.trunc(self.score_value / 2)
+        self.speed = 6 + math.trunc(self.score_value / 5)
+
+        screen.blit(self.cadre, (0, 0))
+        player.update_health_bar(screen)
+

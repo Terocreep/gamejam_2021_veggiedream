@@ -25,7 +25,7 @@ class Saw(object):
         self.rect = pygame.rect.Rect(self.x + 5, self.y + 5, self.width - 10, self.height)
         if self.frame_count >= 8:
             self.frame_count = 0
-        self.sprite = pygame.transform.scale(self.img[self.frame_count // 2], (96, 96))
+        self.sprite = pygame.transform.scale(self.img[self.frame_count // 2], (80, 80))
         screen.blit(self.sprite, (self.x, self.y))
         self.frame_count += 1
 
@@ -44,7 +44,6 @@ class Carrot(Saw):
     def draw(self, screen):
         self.rect = pygame.rect.Rect(self.x, self.y, self.width, self.height)
         screen.blit(pygame.transform.scale(self.img[0], (32, 32)), (self.x, self.y))
-        #pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
 
 class GiantCarrot(Saw):
@@ -64,6 +63,8 @@ class GiantCarrot(Saw):
 
     ]
     hit_obstacle = False
+    mx = 128
+    my = 128
 
     def draw(self, screen,):
         if self.hit_obstacle:
@@ -71,20 +72,18 @@ class GiantCarrot(Saw):
                 self.frame_count = 0
                 self.hit_obstacle=False
 
-            screen.blit(pygame.transform.scale(self.gsprit[math.trunc(self.frame_count / 4)], (128, 128)),
-                        (self.x, self.y))
-            screen.blit(pygame.transform.scale(self.img[math.trunc(self.frame_count / 4)], (128, 128)),
-                        (self.x, self.y))
+            screen.blit(pygame.transform.scale(self.img[math.trunc(self.frame_count / 4)], (self.mx, self.my)),
+                        (0, 709 - self.my))
+            screen.blit(pygame.transform.scale(self.gsprit[math.trunc(self.frame_count / 4)], (self.mx, self.my)),
+                        (0, 709 - self.my))
         else:
-            self.rect = pygame.rect.Rect(self.x, self.y, self.width, self.height)
+            self.rect = pygame.rect.Rect(self.x, 709 - self.my, self.mx, self.my)
             if self.frame_count >= 16:
                 self.frame_count = 0
-            screen.blit(pygame.transform.scale(self.img[math.trunc(self.frame_count / 4)], (128, 128)),
-                        (self.x, self.y))
-            # screen.blit(pygame.transform.scale(self.gsprit[self.frame_count // 2], (128, 128)), (self.x, self.y))
+            screen.blit(pygame.transform.scale(self.img[math.trunc(self.frame_count / 4)], (self.mx, self.my)),
+                        (0, 709 - self.my))
 
         self.frame_count += 1
-        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
     def hit(self, screen):
         self.frame_count = 0
