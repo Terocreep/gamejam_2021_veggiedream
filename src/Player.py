@@ -111,10 +111,10 @@ class Player:
     def colliding_w_wall_left(self, platform):
         return platform.rect.colliderect(self.rect.x + self.velocity[0], self.rect.y + 1, 1, self.rect.h - 2)
 
-    def jump(self, platforms):
+    def jump(self, velocity, platforms):
         for p in platforms:
             if self.velocity[1] == 0 and not self.is_on(p):
-                self.velocity[1] = -31
+                self.velocity[1] = -velocity
 
     def gravity(self):
         self.velocity[1] += 2
@@ -131,11 +131,16 @@ class Player:
                     mort = True
         for e in enemys:
             if self.rect.x - 100 < e.rect.x < self.rect.x + 100:
+
                 if self.rect.colliderect(e.rect):
                     mort = True
         for o in obstacles:
             if self.rect.x - 100 < o.rect.x < self.rect.x + 100:
-                if self.rect.colliderect(o.rect):
+                m1 = pygame.mask.from_surface(self.sprite)
+                m2 = pygame.mask.from_surface(o.sprite)
+
+                if m1.overlap(m2, (self.rect.centerx - o.rect.centerx,
+                                   self.rect.centery - o.rect.centery)):
                     mort = True
         if mort:
             # réspawn aux coordonée

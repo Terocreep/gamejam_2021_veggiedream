@@ -60,7 +60,7 @@ class Platformer:
                 off_y = 0
 
             if y == -1:
-                self.player.jump(self.platforms)
+                self.player.jump(31, self.platforms)
                 self.player.update(self.platforms)
             elif y == 1:
                 self.player.sneak(self.platforms)

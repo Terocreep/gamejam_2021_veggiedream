@@ -6,7 +6,7 @@ import pygame
 import random
 
 player = Player("", 400, 200)
-gCarrot = GiantCarrot(2, 581, 128, 128)
+gCarrot = GiantCarrot(0, 581, 128, 128)
 
 class Runner:
 
@@ -29,13 +29,19 @@ class Runner:
         self.carrots = []
         self.random_carrot_spawn = random.randint(40, 70)
 
-        #Score
-        self.score = 0
+        # Score display
+        self.score_value = 0
+        self.font = pygame.font.Font('freesansbold.ttf', 34)
+        self.txtX = 950
+        self.txtY = 10
 
-        #Collision
-        self.enemy = []
+        # Game Over
+        self.game_over = False
 
-        # backGroud for paralax
+        # Collision with enemy
+        self.enemy = [gCarrot]
+
+        # backGround for paralax
         self.background_images = []
         self.background_images.append(pygame.transform.scale(pygame.image.load("images/background_layers/Layer_4.png"),
                                                              (512, 384)))
@@ -81,11 +87,13 @@ class Runner:
         gCarrot.draw(screen)
 
         #Verfication de la collision
-        player.die([], self.enemy, self.obstacles)
+        if player.die([], self.enemy, self.obstacles):
+            self.game_over = True
+            print("Game Over")
 
         #Deplacement du joueur
         if y == -1:
-            player.jump(self.platforms_sol)
+            player.jump(25, self.platforms_sol)
             player.update(self.platforms_sol)
         elif y == 1:
             player.velocity[0] = -2
@@ -98,14 +106,19 @@ class Runner:
         if self.nb_frame == self.random_carrot_spawn:
             h = random.randint(450, 677)
             self.carrots.append(Carrot(1030, h, 32, 32))
-            self.random_carrot_spawn = random.randint(45, 70)
+            if self.score_value < 30:
+                self.random_carrot_spawn = random.randint(45, 70)
+            elif 30 <= self.score_value <= 60:
+                self.random_carrot_spawn = random.randint(30, 45)
+            else:
+                self.random_carrot_spawn = random.randint(15, 30)
 
         for carrot in self.carrots:
             carrot.x -= self.speed
             if player.rect.x - 100 < carrot.x < player.rect.x + 100:
                 if player.catchCarrot(self.carrots):
                     self.carrots.pop(self.carrots.index(carrot))
-                    self.score += 1
+                    self.score_value += 1
             if carrot.x < carrot.width * -1:
                 self.carrots.pop(self.carrots.index(carrot))
             carrot.draw(screen)
@@ -114,12 +127,17 @@ class Runner:
         if self.nb_frame == self.random_frame:
             r = random.randint(0, 2)
             if r == 0:
-                self.obstacles.append(Saw(1030, 645, 64, 64))
+                self.obstacles.append(Saw(1030, 613, 96, 96))
             elif r == 1:
                 self.obstacles.append(Bird(1030, 450, 64, 32))
 
             self.nb_frame = 0
-            self.random_frame = random.randint(60,80)
+            if self.score_value < 30:
+                self.random_frame = random.randint(60, 80)
+            elif 30 <= self.score_value <= 60:
+                self.random_frame = random.randint(40, 60)
+            else:
+                self.random_frame = random.randint(20, 40)
 
         for obstacle in self.obstacles:
 
@@ -127,10 +145,17 @@ class Runner:
             obstacle.draw(screen)
 
             if gCarrot.destroyObstacle(self.obstacles):
-                print("destruct")
+                gCarrot.hit(screen)
+                self.obstacles.pop(self.obstacles.index(obstacle))
+
+            # Ajout de la Carrote Géante
+            gCarrot.draw(screen)
 
             if obstacle.x < obstacle.width * -1:
                 self.obstacles.pop(self.obstacles.index(obstacle))
 
+            score = self.font.render(str(self.score_value), True, (255, 255, 255))
+            screen.blit(score, (self.txtX, self.txtY))
+
         self.nb_frame += 1
-        self.speed = 6 + math.trunc(self.score/2)
+        self.speed = 6 + math.trunc(self.score_value / 2)
