@@ -11,6 +11,11 @@ class Player:
         self.image.fill((255, 255, 255))
         self.walkcount = 0
         self.dust = []
+        self.imgs_falling = [
+            pygame.transform.scale(pygame.image.load("images/lapin_falling_1.png"), (66, 64)),
+            pygame.transform.scale(pygame.image.load("images/lapin_falling_2.png"), (66, 64)),
+            pygame.transform.scale(pygame.image.load("images/lapin_falling_3.png"), (66, 64))
+        ]
         self.imgs = [pygame.transform.scale(pygame.image.load("images/lapin_course_1.png"), (66, 64)),
                      pygame.transform.scale(pygame.image.load("images/lapin_course_2.png"), (66, 64)),
                      pygame.transform.scale(pygame.image.load("images/lapin_course_3.png"), (66, 64)),
@@ -82,13 +87,13 @@ class Player:
         if self.velocity[0] != 0 or self.walkcount != 1 or self.walking:
             self.walkcount += 1
 
-        if self.walkcount == 20:
+        if self.walkcount == 24:
             self.walkcount = 1
 
-        self.img = self.imgs[math.trunc(self.walkcount/5)]
+        self.img = self.imgs[math.trunc(self.walkcount/6)]
 
-        if self.is_falling:
-            self.img = self.imgs[math.trunc(self.walkcount / 5)]
+        if self.velocity[1] > 0:
+            self.img = self.imgs_falling[math.trunc(self.walkcount / 8)]
 
         if self.walking:
             self.sprite = pygame.transform.flip(self.img, False, False)
@@ -114,11 +119,12 @@ class Player:
     def jump(self, velocity, platforms):
         for p in platforms:
             if self.velocity[1] == 0 and not self.is_on(p):
+                self.is_falling = True
                 self.velocity[1] = -velocity
 
     def gravity(self):
         self.velocity[1] += 2
-        if self.velocity[1] >40:
+        if self.velocity[1] > 40:
             self.velocity[1] = 40
 
     def die(self, platforms, enemys, obstacles):

@@ -13,10 +13,12 @@ import json
 
 
 class Platformer:
-    def __init__(self, level):
-        self.player = Player("", 0, 500)
-        self.player.rect.x = 0
-        self.player.rect.y = 500
+    def __init__(self):
+        self.player = Player("", 70, 9200)
+
+        self.height = 0
+        self.width = 0
+
         self.score = Score("michel")
         self.score.newVar("meurt", -10)
 
@@ -27,6 +29,7 @@ class Platformer:
 
         self.platforms = []
 
+    def load_level(self, level):
         with open("levels/lvl{}.json".format(level), 'r') as f:
             data = f.read()
 

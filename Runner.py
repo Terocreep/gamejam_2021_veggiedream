@@ -10,7 +10,7 @@ gCarrot = GiantCarrot(0, 581, 128, 128)
 
 class Runner:
 
-    def __init__(self, level):
+    def __init__(self):
 
         self.speed = 6
 
