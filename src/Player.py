@@ -1,6 +1,7 @@
 import pygame
 import math
 from pygame import mixer
+from src.Score import Score
 
 
 pygame.display.set_mode((1024, 768))
@@ -11,7 +12,7 @@ class Player:
         self.image = pygame.Surface((66, 64))
         self.image.fill((255, 255, 255))
         self.walkcount = 0
-        self.health = 24
+        self.health = 50
         self.max_health = 100
         self.imgs_falling = [
             pygame.transform.scale(pygame.image.load("images/lapin_falling_1.png"), (66, 64)),
@@ -35,6 +36,7 @@ class Player:
         self.is_falling = True
         pygame.mixer.init()
         self.sound_jump = mixer.Sound('musics/jump_sound.ogg')
+        self.asLaSuperCarotte = False
 
     def sneak(self, platforms):
         self.is_falling = True
@@ -120,12 +122,13 @@ class Player:
     def colliding_w_wall_left(self, platform):
         return platform.rect.colliderect(self.rect.x + self.velocity[0], self.rect.y + 1, 1, self.rect.h - 2)
 
-    def jump(self, velocity, platforms):
+    def jump(self, velocity, platforms, jb):
         for p in platforms:
             if self.velocity[1] == 0 and not self.is_on(p) and not self.rect.colliderect(p.rect):
                 self.is_falling = True
                 self.velocity[1] = -velocity
-                self.sound_jump.play()
+                if jb:
+                    self.sound_jump.play()
 
     def gravity(self):
         self.velocity[1] += 2
@@ -163,6 +166,17 @@ class Player:
             self.velocity[0] = 0
             self.velocity[1] = 0
         return mort
+
+    def collect(self, colectibles, score):
+        for c in colectibles:
+            m1 = pygame.mask.from_surface(self.sprite)
+            m2 = pygame.mask.from_surface(c.sprite)
+            if m1.overlap(m2, (self.rect.centerx - c.rect.centerx,
+                               self.rect.centery - c.rect.centery)):
+                # éxécute la variation qui as le même nom que le colectible
+                score.execVar(c.recup(colectibles))
+                self.addHealth(5)
+                self.asLaSuperCarotte = c.name == "superCarotte"
 
     def catchCarrot(self, carrots):
         catch = False

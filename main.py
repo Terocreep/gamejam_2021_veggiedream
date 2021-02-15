@@ -14,17 +14,19 @@ FPS = 30
 #Menu
 menu = Menu()
 
+escape = False
+
 x = 0
 y = 0
 
-phase = "menu"
+phase = ""
 
 clicking = False
 
 
 def menu_update(px, py, click):
     if phase == "menu":
-        menu.update(px, py, screen, click)
+        menu.update(px, py, screen, click, escape)
 
 
 def update(ux, uy):
@@ -42,21 +44,23 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_z or event.key == pygame.K_UP:
+            if event.key == pygame.K_UP:
                 y = -1
-            elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN:
                 y = 1
-            elif event.key == pygame.K_q or event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_LEFT:
                 x = -1
-            elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT:
                 x = 1
+            elif event.key == pygame.K_ESCAPE:
+                escape = True
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_z or event.key == pygame.K_UP \
-                    or event.key == pygame.K_s or event.key == pygame.K_DOWN:
+            if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                 y = 0
-            elif event.key == pygame.K_q or event.key == pygame.K_LEFT \
-                    or event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 x = 0
+            elif event.key == pygame.K_ESCAPE:
+                escape = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 clicking = True
@@ -66,6 +70,16 @@ while running:
 
     mx, my = pygame.mouse.get_pos()
     menu_update(mx, my, clicking)
+    if menu.run.game_over or menu.plat.game_over:
+        phase = "menu"
+        menu_update(mx, my, clicking)
+    if menu.plat.victory:
+        phase = "menu"
+        menu_update(mx, my, clicking)
+
+    if escape and phase == "":
+        phase = "menu"
+
     if menu.platformer:
         phase = "platform"
     elif menu.runner:

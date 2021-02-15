@@ -5,6 +5,7 @@ import math
 import pygame
 import random
 from pygame import mixer
+from src.Score import Score
 
 player = Player("", 400, 200)
 gCarrot = GiantCarrot(0, 581, 128, 128)
@@ -21,14 +22,15 @@ class Runner:
 
         self.x = 0
 
+        self.score = Score("")
+
         # Music
         pygame.mixer.init()
-        mixer.music.load('musics/background_runner.ogg')
-        mixer.music.play(-1)
 
         #Genere un evenement aleatoire entre 2 et 3,5 secondes
         self.obstacles = []
         self.nb_frame = 0
+        self.nb_frame_carrot = 0
         self.random_frame = random.randint(60,120)
 
         #Carrots
@@ -69,6 +71,18 @@ class Runner:
 
         player.walking = True
 
+    def play_music(self, pb):
+        mixer.music.load('musics/background_runner.ogg')
+        if pb:
+            mixer.music.play(-1)
+        else:
+            mixer.music.stop()
+
+    def set_player(self, username):
+        self.score = Score(username)
+        self.score.newVar("meurt", -10)
+        self.score.newVar("carrote", 5)
+
     def update(self, x, y, screen):
 
         self.enemy = [self.gCarrot]
@@ -102,18 +116,19 @@ class Runner:
         #Verfication de la collision
         if player.die([], [], self.obstacles) or player.rect.x <= self.enemy[0].mx:
             player.removeHealth(20)
-            print("Health : ", player.getHealth())
+            self.score.execVar("meurt")
             player.rect.x = player.x
             player.rect.y = player.y
             player.velocity[0] = 0
             player.velocity[1] = 0
             if player.health <= 0:
+                self.score.finPartie()
                 self.game_over = True
-                print("Game Over")
+                player.health = 50
 
         #Deplacement du joueur
         if y == -1:
-            player.jump(25, self.platforms_sol)
+            player.jump(25, self.platforms_sol, True)
             player.update(self.platforms_sol)
         elif y == 1:
             player.velocity[0] = -2
@@ -123,9 +138,10 @@ class Runner:
         screen.blit(player.sprite, player.rect)
 
         #Ajout de carotte
-        if self.nb_frame == self.random_carrot_spawn:
+        if self.nb_frame_carrot == self.random_carrot_spawn:
             h = random.randint(500, 675)
             self.carrots.append(Carrot(1030, h, 32, 32))
+            self.nb_frame_carrot = 0
             if self.score_value < 5:
                 self.random_carrot_spawn = random.randint(40, 60)
             elif 5 <= self.score_value <= 7:
@@ -141,7 +157,8 @@ class Runner:
                 if player.catchCarrot(self.carrots):
                     self.score_value += 1
                     isCatched = True
-                    player.addHealth(3)
+                    player.addHealth(1)
+                    self.score.execVar("carrote")
             if carrot.x < self.gCarrot.rect.x + 100:
                 if self.gCarrot.rect.colliderect(carrot.rect):
                     self.gCarrot.mx += 5
@@ -199,6 +216,7 @@ class Runner:
         screen.blit(score, (self.txtX, self.txtY))
 
         self.nb_frame += 1
+        self.nb_frame_carrot += 1
         self.speed = 6 + math.trunc(self.score_value / 5)
 
         screen.blit(self.cadre, (0, 0))

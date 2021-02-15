@@ -26,7 +26,7 @@ class Storage:
         self.liste_score = {"rank": nouvelList}
 
     def ecrire_info(self, score):
-        newData = {"pseudo": self.nom, "score": score}
+        newData = {"nom": self.nom, "score": score}
         #met le nouveau score dans la liste ordonée de self.liste_score
         self.ordre(newData)
         with open(self.nom_fichier, 'w') as fichier:

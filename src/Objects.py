@@ -39,7 +39,7 @@ class Bird(Saw):
 
 
 class Carrot(Saw):
-    img = [pygame.image.load(os.path.join('images', 'carrot.png'))]
+    img = [pygame.image.load(os.path.join('images', 'carrote.png'))]
 
     def draw(self, screen):
         self.rect = pygame.rect.Rect(self.x, self.y, self.width, self.height)

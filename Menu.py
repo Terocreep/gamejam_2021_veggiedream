@@ -3,16 +3,26 @@ import math
 
 from Platformer import Platformer
 from Runner import Runner
+from pygame import mixer
+
+from src.Score import Score
 
 
 class Menu:
 
     def __init__(self):
+        self.background_game_over = pygame.transform.scale(pygame.image.load("images/menu_images/game_over.png"), (1024, 768))
+        self.background_victory = pygame.transform.scale(pygame.image.load("images/menu_images/victory.png"), (1024, 768))
         self.nbbg = 0
+
+        self.run = Runner()
+        self.plat = Platformer()
 
         self.anim_1 = True
         self.anim_2 = False
         self.anim_3 = False
+
+        self.gam_over = False
 
         self.alpha = 0
 
@@ -20,11 +30,10 @@ class Menu:
         self.rabbity = 700
         self.move = 0
 
-        self.run = Runner()
-        self.plat = Platformer()
-
         self.font_letter = pygame.font.Font("font/Daydream.ttf", 20)
         self.font_name = pygame.font.Font("font/Daydream.ttf", 50)
+        self.font_credit_1 = pygame.font.Font("font/Daydream.ttf", 35)
+        self.font_credit_2 = pygame.font.Font("font/Daydream.ttf", 15)
 
         self.background = pygame.transform.scale(pygame.image.load("images/menu_images/background.png"), (1024, 768))
 
@@ -53,6 +62,8 @@ class Menu:
                       pygame.image.load("images/menu_images/title_black.png")]
         self.delet = [pygame.image.load("images/menu_images/suppr_fondnoir.png"),
                       pygame.image.load("images/menu_images/suppr_fondblanc.png")]
+        self.menu = [pygame.image.load("images/menu_images/menu_button.png"),
+                      pygame.image.load("images/menu_images/menu_button_2.png")]
         self.mouse = pygame.rect.Rect(0, 0, 1, 1)
 
         self.was_clicked = False
@@ -65,6 +76,11 @@ class Menu:
 
         self.select_level = False
 
+        self.score_bool = False
+        self.score = Score("")
+
+        self.victory = False
+
         self.prep_runner = False
         self.prep_platformer = False
 
@@ -72,11 +88,32 @@ class Menu:
         self.platformer = False
 
         self.music = True
-        pygame.mixer.init()
-        pygame.mixer.music.load("musics/menu_simple.ogg")
-        pygame.mixer.music.play(-1)
+        mixer.init()
+        mixer.music.load("musics/menu_simple.ogg")
+        mixer.music.play(-1)
 
         self.name = ""
+
+        self.cred = 0
+
+        self.credits_texts = [
+            (self.font_credit_1.render("VeggieDream", False, (255, 255, 255)), 768),
+            (self.font_credit_1.render("par  l'equipe Jabami", False, (255, 255, 255)), 820),
+            (self.font_credit_2.render("Merci a Brahim pour", False, (255, 255, 255)), 872),
+            (self.font_credit_2.render("Le design et l'animation de VeggieDream", False, (255, 255, 255)), 904),
+            (self.font_credit_2.render("Merci a Thomas PAUL, Thomas ROBSON et Quentin", False, (255, 255, 255)), 936),
+            (self.font_credit_2.render("Pour le developpement du jeu", False, (255, 255, 255)), 968),
+
+            (self.font_credit_1.render("ressources annexes", False, (255, 255, 255)), 1068),
+            (self.font_credit_2.render("Merci a EDER MUNIZ pour", False, (255, 255, 255)), 1120),
+            (self.font_credit_2.render("La foret en fond", False, (255, 255, 255)), 1152),
+            (self.font_credit_2.render("Merci a Lorne Balfe pour", False, (255, 255, 255)), 1184),
+            (self.font_credit_2.render("Le Theme de Mission:Impossible", False, (255, 255, 255)), 1216),
+
+            (self.font_credit_1.render("Utilisation de", False, (255, 255, 255)), 1316),
+            (self.font_credit_2.render("python et", False, (255, 255, 255)), 1368),
+            (self.font_credit_2.render("pygame", False, (255, 255, 255)), 1400),
+        ]
 
         self.char = [
             "A", "B", "C", "D", "E", "F", "G", "H", "I",
@@ -112,7 +149,7 @@ class Menu:
                                    ))
         self.click = False
 
-    def update(self, mx, my, screen, click):
+    def update(self, mx, my, screen, click, esc):
         self.mouse.x = mx
         self.mouse.y = my
         self.nbbg += 1
@@ -125,7 +162,7 @@ class Menu:
             pygame.mixer.music.stop()
 
         # select level
-        if self.play_bool and not self.credits_bool and self.select_level \
+        if self.play_bool and not self.credits_bool and self.select_level and not self.score_bool \
                 and not self.anim_1 and not self.anim_2 and not self.anim_3:
             # Mise en place titre
             rect_title = self.title[0].get_rect()
@@ -163,8 +200,9 @@ class Menu:
             rl = self.lapin_marche[0].get_rect()
             rl.bottomleft = (self.rabbitx, self.rabbity)
             screen.blit(pygame.transform.flip(self.lapin_marche[0], True, False), rl)
-        # menu play
-        if self.play_bool and not self.credits_bool and not self.select_level \
+
+        # menu score
+        if self.score_bool \
                 and not self.anim_1 and not self.anim_2 and not self.anim_3:
             # Mise en place titre
             rect_title = self.title[0].get_rect()
@@ -172,37 +210,92 @@ class Menu:
             rect_title.top = 50
             screen.blit(self.title[0], rect_title)
 
-            # Mise en place campagne
-            rect_campagne = self.campagne[0].get_rect()
-            rect_campagne.right = 1024 / 2 - 50
-            rect_campagne.top = 300
-            if rect_campagne.colliderect(self.mouse):
-                screen.blit(self.campagne[1], rect_campagne)
-                self.play_hover = True
-                if not click and self.was_clicked:
-                    self.select_level = True
-            else:
-                screen.blit(self.campagne[0], rect_campagne)
-                self.play_hover = False
-
-            # Mise en place arcade
-            rect_arcade = self.arcade[0].get_rect()
-            rect_arcade.left = 1024 / 2 + 50
-            rect_arcade.top = 300
-            if rect_arcade.colliderect(self.mouse):
-                screen.blit(self.arcade[1], rect_arcade)
-                if not click and self.was_clicked:
-                    self.prep_runner = True
-                    self.anim_3 = True
-            else:
-                screen.blit(self.arcade[0], rect_arcade)
-                self.credits_hover = False
+            self.score = Score(self.name)
 
             nrender = self.font_name.render(self.name, False, (255, 255, 255))
             nrect = nrender.get_rect()
             nrect.centerx = 1024 / 2
             nrect.y = 190
             screen.blit(nrender, nrect)
+
+            highscore = 0
+            pos = 0
+
+            for i in self.score.getClassement():
+                if i:
+                    if i['score'] > highscore:
+                        pos += 1
+                    if i['nom'] == self.name and i['score'] > highscore:
+                        highscore = i['score']
+
+            nrender = self.font_name.render("High Score : " + str(highscore), False, (255, 255, 255))
+            nrect = nrender.get_rect()
+            nrect.centerx = 1024 / 2
+            nrect.y = 275
+            screen.blit(nrender, nrect)
+
+            nrender = self.font_credit_2.render("Classement : " + str(pos), False, (255, 255, 255))
+            nrect = nrender.get_rect()
+            nrect.centerx = 1024 / 2
+            nrect.y = 375
+            screen.blit(nrender, nrect)
+
+            # mise en place du lapin
+            rl = self.lapin_marche[0].get_rect()
+            rl.bottomleft = (self.rabbitx, self.rabbity)
+            screen.blit(pygame.transform.flip(self.lapin_marche[0], True, False), rl)
+
+            if esc:
+                self.score_bool= False
+
+        # menu play
+        if self.play_bool and not self.credits_bool and not self.select_level and not self.score_bool \
+                and not self.anim_1 and not self.anim_2 and not self.anim_3:
+            # Mise en place titre
+            rect_title = self.title[0].get_rect()
+            rect_title.centerx = 1024 / 2
+            rect_title.top = 50
+            screen.blit(self.title[0], rect_title)
+
+            if 3 <= len(self.name) <= 15:
+            # Mise en place campagne
+                rect_campagne = self.campagne[0].get_rect()
+                rect_campagne.right = 1024 / 2 - 50
+                rect_campagne.top = 300
+                if rect_campagne.colliderect(self.mouse):
+                    screen.blit(self.campagne[1], rect_campagne)
+                    self.play_hover = True
+                    if not click and self.was_clicked:
+                        self.select_level = True
+                        self.plat.set_player(self.name)
+                else:
+                    screen.blit(self.campagne[0], rect_campagne)
+                    self.play_hover = False
+
+                # Mise en place arcade
+                rect_arcade = self.arcade[0].get_rect()
+                rect_arcade.left = 1024 / 2 + 50
+                rect_arcade.top = 300
+                if rect_arcade.colliderect(self.mouse):
+                    screen.blit(self.arcade[1], rect_arcade)
+                    if not click and self.was_clicked:
+                        self.prep_runner = True
+                        self.anim_3 = True
+                else:
+                    screen.blit(self.arcade[0], rect_arcade)
+                    self.credits_hover = False
+
+            nrender = self.font_name.render(self.name, False, (255, 255, 255))
+            nrect = nrender.get_rect()
+            nrect.centerx = 1024 / 2
+            nrect.y = 190
+            if nrect.colliderect(self.mouse):
+                nrender = self.font_name.render(self.name, False, (0, 0, 0))
+                screen.blit(nrender, nrect)
+                if not click and self.was_clicked:
+                    self.score_bool = True
+            else:
+                screen.blit(nrender, nrect)
 
             for k in self.key:
                 re = pygame.rect.Rect(k[0], k[1], 50, 50)
@@ -236,8 +329,8 @@ class Menu:
             rl = self.lapin_marche[0].get_rect()
             rl.bottomleft = (self.rabbitx, self.rabbity)
             screen.blit(pygame.transform.flip(self.lapin_marche[0], True, False), rl)
-        # select level
-        if not self.play_bool and not self.credits_bool \
+        # menu 1
+        if not self.play_bool and not self.credits_bool and not self.score_bool \
                 and not self.anim_1 and not self.anim_2 and not self.anim_3:
 
             # Mise en place titre
@@ -275,7 +368,6 @@ class Menu:
 
             if not click and self.was_clicked and self.play_hover:
                 print("play")
-                self.music = False
                 self.play_bool = True
                 self.anim_2 = True
 
@@ -283,6 +375,80 @@ class Menu:
                 print("credits")
                 self.credits_bool = True
                 self.anim_2 = True
+                mixer.music.load("musics/fin_triste_longue.ogg")
+                mixer.music.play(1)
+
+        self.gam_over = (self.plat.game_over or self.run.game_over)
+
+        # GameOver
+        if self.gam_over:
+            self.platformer = False
+            self.runner = False
+
+            screen.blit(self.background_game_over, pygame.Surface((1024, 768)).get_rect())
+
+            nrender = self.font_name.render("You lose, Try again !", False, (255, 255, 255))
+            nrect = nrender.get_rect()
+            nrect.centerx = 1024 / 2
+            nrect.y = 190
+            screen.blit(nrender, nrect)
+
+            # Mise en place back_menu
+            rect_menu = self.menu[0].get_rect()
+            rect_menu.centerx = 1024 / 2
+            rect_menu.top = 300
+            if rect_menu.colliderect(self.mouse):
+                screen.blit(self.menu[1], rect_menu)
+                if not click and self.was_clicked:
+                    self.__init__()
+            else:
+                screen.blit(self.menu[0], rect_menu)
+
+        self.victory = self.plat.victory
+
+        # victory
+        if self.victory:
+            self.platformer = False
+            self.runner = False
+
+            screen.blit(self.background_victory, pygame.Surface((1024, 768)).get_rect())
+
+            nrender = self.font_name.render("You won !", False, (255, 255, 255))
+            nrect = nrender.get_rect()
+            nrect.centerx = 1024 / 2
+            nrect.y = 190
+            screen.blit(nrender, nrect)
+
+            # Mise en place back_menu
+            rect_menu = self.menu[0].get_rect()
+            rect_menu.centerx = 1024 / 2
+            rect_menu.top = 300
+            if rect_menu.colliderect(self.mouse):
+                screen.blit(self.menu[1], rect_menu)
+                if not click and self.was_clicked:
+                    self.__init__()
+            else:
+                screen.blit(self.menu[0], rect_menu)
+
+        # credits
+        if self.credits_bool \
+                and not self.anim_1 and not self.anim_2 and not self.anim_3:
+            s = pygame.surface.Surface((1024, 768))
+            s.set_alpha(255)
+            screen.blit(s, (0, 0))
+            for elem in self.credits_texts:
+                nrect = elem[0].get_rect()
+                nrect.centerx = 1024 / 2
+                nrect.y = elem[1] - self.cred
+                screen.blit(elem[0], nrect)
+            self.cred += 1.5
+
+            if self.nbbg == 0 and self.move == 37:
+                self.__init__()
+            elif self.nbbg == 0:
+                self.move += 1
+
+
 
         self.was_clicked = click
 
@@ -304,6 +470,8 @@ class Menu:
             self.rabbitx += 5
             if self.nbbg == 0 and self.move == 2:
                 self.anim_2 = False
+                if self.credits_bool:
+                    self.anim_3 = True
                 self.move = 0
             elif self.nbbg == 0:
                 self.move += 1
@@ -322,7 +490,10 @@ class Menu:
             if self.nbbg == 0 and self.move == 6:
                 self.anim_3 = False
                 self.move = 0
-                self.platformer = self.prep_platformer
-                self.runner = self.prep_runner
+                if self.prep_platformer:
+                    self.platformer = self.prep_platformer
+                if self.prep_runner:
+                    self.runner = self.prep_runner
+                    self.run.play_music(self.music)
             elif self.nbbg == 0:
                 self.move += 1
